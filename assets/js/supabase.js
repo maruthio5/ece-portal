@@ -6,8 +6,8 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 // ─── CONFIG ─────────────────────────────────────────────────────
 // Replace these with your actual values from Supabase dashboard
 // OR set them via environment variables if using Vite
-const SUPABASE_URL  = window.__ENV__?.SUPABASE_URL  || 'https://YOUR_PROJECT.supabase.co'
-const SUPABASE_KEY  = window.__ENV__?.SUPABASE_KEY  || 'YOUR_ANON_KEY'
+const SUPABASE_URL  = window.__ENV__?.SUPABASE_URL  || 'https://bjmrivbuyxsdlebbonrd.supabase.co'
+const SUPABASE_KEY  = window.__ENV__?.SUPABASE_KEY  || 'sb_publishable_NBKAKHqjAPXQ3mFmW1Bg7g_S4bl3HlA'
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
