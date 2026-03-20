@@ -143,12 +143,14 @@ initTheme()
 // Minimum splash display time + boot
 setTimeout(() => {
   hideSplash()
-  const user = getCurrentUser()
-  if (!user && !window.location.hash) {
-    window.location.hash = '#/login'
-  }
-  router.start()
-}, 1200)
+  setTimeout(() => {
+    const user = getCurrentUser()
+    if (!user) {
+      window.location.hash = '#/login'
+    }
+    router.start()
+  }, 700)
+}, 1500)
 </script>
 </body>
 </html>
