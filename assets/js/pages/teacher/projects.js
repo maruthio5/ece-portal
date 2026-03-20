@@ -1,89 +1,205 @@
-// assets/js/pages/teacher/qr-generate.js
+// assets/js/pages/teacher/projects.js
 import { requireAuth } from '../../auth.js'
 import { db } from '../../db.js'
 import { renderShell } from '../../shared/shell.js'
 import { showToast } from '../../toast.js'
+import { subscribeToProjectPosts } from '../../realtime.js'
 
-const QR_VALIDITY_MS = 15 * 60 * 1000 // 15 minutes
+let cleanupRealtime = null
 
-export async function renderQRGenerate() {
+const STATUS_META = {
+  planning:   { label: 'Planning',    color: '#58a6ff' },
+  inprogress: { label: 'In Progress', color: '#ffa657' },
+  completed:  { label: 'Completed',   color: '#00e5a0' },
+  stuck:      { label: 'Stuck 🛑',    color: '#ff5370' },
+  review:     { label: 'In Review',   color: '#c084fc' },
+  feedback:   { label: 'Feedback',    color: '#f0c040' },
+}
+
+export async function renderTeacherProjects() {
   const user = requireAuth(['teacher'])
   if (!user) return
 
-  renderShell(user, 'qr-generate')
+  renderShell(user, 'projects')
   const content = document.getElementById('pageContent')
-
-  // Load timetable to pre-fill subjects
-  let subjects = []
-  try {
-    const all = await db.timetable.getAll()
-    const mine = all.filter(t => t.teacher_id === user.id || t.teacher === user.name)
-    subjects = [...new Set(mine.map(t => t.subject))].sort()
-  } catch (_) {}
-
   content.innerHTML = `
     <div class="page-container animate-up">
       <div class="page-header">
-        <h1 class="page-title">QR Attendance</h1>
+        <h1 class="page-title">Project Groups</h1>
+        <button class="btn-primary" onclick="openCreateGroupModal()">+ Create Group</button>
       </div>
-
-      <div class="panel">
-        <h3 class="panel-section-title">Generate QR Code</h3>
-        <div class="field-group">
-          <label>Subject</label>
-          <select id="qrSubject" class="field-input">
-            <option value="">— Select Subject —</option>
-            ${subjects.map(s => `<option value="${s}">${s}</option>`).join('')}
-            <option value="__custom">Other (type below)</option>
-          </select>
-        </div>
-        <div class="field-group hidden" id="customSubjectWrap">
-          <label>Custom Subject Name</label>
-          <input type="text" id="customSubject" class="field-input" placeholder="Enter subject name" />
-        </div>
-        <div class="field-group">
-          <label>Date</label>
-          <input type="date" id="qrDate" class="field-input" value="${new Date().toISOString().split('T')[0]}" />
-        </div>
-        <div class="field-group">
-          <label>Validity</label>
-          <select id="qrValidity" class="field-input">
-            <option value="900000">15 minutes</option>
-            <option value="1800000">30 minutes</option>
-            <option value="3600000">1 hour</option>
-          </select>
-        </div>
-        <button class="btn-primary" style="width:100%" onclick="generateQR()">Generate QR Code</button>
+      <div id="groupsList"><div class="skeleton" style="height:300px;border-radius:12px"></div></div>
+      <div class="project-feed-wrap hidden" id="feedWrap">
+        <button class="btn-outline back-btn" onclick="backToGroups()">← Back</button>
+        <div id="feedHeader"></div>
+        <div class="project-feed" id="projectFeed"></div>
       </div>
+    </div>
 
-      <!-- QR Display -->
-      <div class="qr-display-card hidden" id="qrDisplay">
-        <div class="qr-display-subject" id="qrDisplaySubject"></div>
-        <div id="qrCode" class="qr-code-container"></div>
-        <div class="qr-timer" id="qrTimer"></div>
-        <button class="btn-outline" style="width:100%;margin-top:12px" onclick="regenerateQR()">Regenerate</button>
+    <!-- Create Group Modal -->
+    <div class="modal hidden" id="createGroupModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>Create Project Group</h3>
+          <button class="modal-close" onclick="closeCreateGroupModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="field-group"><label>Group Name</label>
+            <input type="text" id="gName" class="field-input" placeholder="Team Alpha" /></div>
+          <div class="field-group"><label>Subject</label>
+            <input type="text" id="gSubject" class="field-input" placeholder="Project subject" /></div>
+          <div class="field-group"><label>Description</label>
+            <textarea id="gDesc" class="field-input" rows="2" placeholder="Brief description…"></textarea></div>
+          <div class="modal-grid">
+            <div class="field-group"><label>Semester</label>
+              <select id="gSem" class="field-input">${[1,2,3,4,5,6].map(s=>`<option value="${s}">${s}</option>`).join('')}</select></div>
+            <div class="field-group"><label>Batch</label>
+              <input type="text" id="gBatch" class="field-input" placeholder="2024-2027" /></div>
+          </div>
+          <div class="field-group"><label>Deadline</label>
+            <input type="date" id="gDeadline" class="field-input" /></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-outline" onclick="closeCreateGroupModal()">Cancel</button>
+          <button class="btn-primary" onclick="createGroup()">Create Group</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal hidden" id="feedbackModal">
+      <div class="modal-box">
+        <div class="modal-header"><h3>Add Feedback</h3>
+          <button class="modal-close" onclick="closeFeedbackModal()">✕</button></div>
+        <div class="modal-body">
+          <textarea id="feedbackText" class="field-input" rows="4" placeholder="Your feedback…"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-outline" onclick="closeFeedbackModal()">Cancel</button>
+          <button class="btn-primary" onclick="submitFeedback()">Submit Feedback</button>
+        </div>
       </div>
     </div>
   `
 
-  document.getElementById('qrSubject').addEventListener('change', function() {
-    document.getElementById('customSubjectWrap').classList.toggle('hidden', this.value !== '__custom')
-  })
+  let feedbackTargetPostId = null
 
-  let timerInterval = null
-  window.generateQR = generateQR
-  window.regenerateQR = generateQR
+  window.openCreateGroupModal = () => document.getElementById('createGroupModal').classList.remove('hidden')
+  window.closeCreateGroupModal = () => document.getElementById('createGroupModal').classList.add('hidden')
+  window.closeFeedbackModal = () => document.getElementById('feedbackModal').classList.add('hidden')
+  window.openFeedbackModal = (postId) => {
+    feedbackTargetPostId = postId
+    document.getElementById('feedbackText').value = ''
+    document.getElementById('feedbackModal').classList.remove('hidden')
+  }
+  window.submitFeedback = async () => {
+    const text = document.getElementById('feedbackText').value.trim()
+    if (!text || !feedbackTargetPostId) return
+    try {
+      await db.projects.addFeedback(feedbackTargetPostId, text)
+      showToast('Feedback submitted!', 'success')
+      window.closeFeedbackModal()
+      // Refresh post in feed
+      document.querySelector(`[data-post-id="${feedbackTargetPostId}"] .post-feedback`)?.remove()
+      const postEl = document.querySelector(`[data-post-id="${feedbackTargetPostId}"]`)
+      if (postEl) postEl.insertAdjacentHTML('beforeend', `<div class="post-feedback">💬 Teacher: ${text}</div>`)
+    } catch (err) { showToast('Failed: ' + err.message, 'error') }
+  }
+  window.createGroup = async () => {
+    const name    = document.getElementById('gName').value.trim()
+    const subject = document.getElementById('gSubject').value.trim()
+    const desc    = document.getElementById('gDesc').value.trim()
+    const sem     = parseInt(document.getElementById('gSem').value)
+    const batch   = document.getElementById('gBatch').value.trim()
+    const deadline= document.getElementById('gDeadline').value || null
+    if (!name || !batch) { showToast('Name and batch required', 'error'); return }
+    try {
+      await db.projects.create({ name, subject, description: desc, semester: sem, batch, deadline, teacher_id: user.id })
+      showToast('Group created!', 'success')
+      window.closeCreateGroupModal()
+      loadGroups()
+    } catch (err) { showToast('Failed: ' + err.message, 'error') }
+  }
+  window.backToGroups = () => {
+    document.getElementById('groupsList').classList.remove('hidden')
+    document.getElementById('feedWrap').classList.add('hidden')
+    if (cleanupRealtime) { cleanupRealtime(); cleanupRealtime = null }
+  }
+  window.openFeed = openFeed
 
-  function generateQR() {
-    let subject = document.getElementById('qrSubject').value
-    if (subject === '__custom') subject = document.getElementById('customSubject').value.trim()
-    const date = document.getElementById('qrDate').value
-    const validity = parseInt(document.getElementById('qrValidity').value)
+  loadGroups()
 
-    if (!subject) { showToast('Select or enter a subject', 'error'); return }
+  window.addEventListener('hashchange', () => {
+    if (cleanupRealtime) { cleanupRealtime(); cleanupRealtime = null }
+  }, { once: true })
 
-    const expires = Date.now() + validity
-    const payload = JSON.stringify({
+  async function loadGroups() {
+    try {
+      const groups = await db.projects.getAll()
+      const el = document.getElementById('groupsList')
+      if (!groups.length) { el.innerHTML = `<div class="empty-state-card"><div class="empty-icon">🗂</div><p>No groups yet</p></div>`; return }
+      el.innerHTML = groups.map(g => `
+        <div class="project-card" onclick="openFeed('${g.id}', '${escStr(g.name)}', '${escStr(g.subject||'')}')">
+          <div class="project-card-header">
+            <div class="project-name">${g.name}</div>
+            <span class="badge badge-info">${g.subject || 'General'}</span>
+          </div>
+          ${g.description ? `<div class="project-desc">${g.description}</div>` : ''}
+          <div class="project-meta">Sem ${g.semester} · ${g.batch}${g.deadline ? ` · Deadline: ${new Date(g.deadline).toLocaleDateString('en-IN')}` : ''}</div>
+        </div>
+      `).join('')
+    } catch (err) { showToast('Failed to load groups', 'error') }
+  }
+
+  async function openFeed(groupId, name, subject) {
+    document.getElementById('groupsList').classList.add('hidden')
+    document.getElementById('feedWrap').classList.remove('hidden')
+    document.getElementById('feedHeader').innerHTML = `
+      <div class="project-feed-title"><div class="project-name">${name}</div>
+        <span class="badge badge-info">${subject}</span></div>
+    `
+    const feedEl = document.getElementById('projectFeed')
+    feedEl.innerHTML = `<div class="chat-loading">Loading…</div>`
+    try {
+      const posts = await db.projects.getPosts(groupId)
+      feedEl.innerHTML = ''
+      if (!posts.length) { feedEl.innerHTML = `<div class="chat-empty">No updates yet</div>`; return }
+      posts.forEach(p => feedEl.insertAdjacentHTML('beforeend', postHTML(p)))
+    } catch (err) { feedEl.innerHTML = `<div class="chat-empty">Load failed</div>` }
+
+    if (cleanupRealtime) cleanupRealtime()
+    cleanupRealtime = subscribeToProjectPosts(groupId, (post) => {
+      const feedEl = document.getElementById('projectFeed')
+      if (feedEl) feedEl.insertAdjacentHTML('afterbegin', postHTML(post))
+    })
+  }
+}
+
+function postHTML(p) {
+  const meta = STATUS_META[p.status] || { label: p.status, color: '#8b949e' }
+  return `
+    <div class="post-card" data-post-id="${p.id}">
+      <div class="post-header">
+        <div class="post-sender">${p.sender_name}</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge" style="background:${meta.color}20;color:${meta.color}">${meta.label}</span>
+          <button class="btn-outline btn-sm" onclick="openFeedbackModal('${p.id}')">+ Feedback</button>
+        </div>
+      </div>
+      ${p.text ? `<div class="post-text">${p.text}</div>` : ''}
+      ${p.media_url ? `<a href="${p.media_url}" class="msg-file-link" target="_blank">📎 ${p.file_name||'File'}</a>` : ''}
+      ${p.teacher_feedback ? `<div class="post-feedback">💬 Teacher: ${p.teacher_feedback}</div>` : ''}
+      <div class="post-time">${timeAgo(p.created_at)}</div>
+    </div>
+  `
+}
+
+function timeAgo(ts) {
+  const m = Math.floor((Date.now() - new Date(ts)) / 60000)
+  if (m < 1) return 'just now'; if (m < 60) return `${m}m ago`
+  const h = Math.floor(m/60); if (h < 24) return `${h}h ago`; return `${Math.floor(h/24)}d ago`
+}
+function escStr(s) { return String(s).replace(/'/g, "\\'") }
       subject,
       teacher: user.name,
       semester: null, // allow any semester
