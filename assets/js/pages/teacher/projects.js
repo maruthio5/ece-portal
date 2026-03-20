@@ -200,6 +200,88 @@ function timeAgo(ts) {
   const h = Math.floor(m/60); if (h < 24) return `${h}h ago`; return `${Math.floor(h/24)}d ago`
 }
 function escStr(s) { return String(s).replace(/'/g, "\\'") }
+    } catch (err) { showToast('Failed: ' + err.message, 'error') }
+  }
+  window.backToGroups = () => {
+    document.getElementById('groupsList').classList.remove('hidden')
+    document.getElementById('feedWrap').classList.add('hidden')
+    if (cleanupRealtime) { cleanupRealtime(); cleanupRealtime = null }
+  }
+  window.openFeed = openFeed
+
+  loadGroups()
+
+  window.addEventListener('hashchange', () => {
+    if (cleanupRealtime) { cleanupRealtime(); cleanupRealtime = null }
+  }, { once: true })
+
+  async function loadGroups() {
+    try {
+      const groups = await db.projects.getAll()
+      const el = document.getElementById('groupsList')
+      if (!groups.length) { el.innerHTML = `<div class="empty-state-card"><div class="empty-icon">🗂</div><p>No groups yet</p></div>`; return }
+      el.innerHTML = groups.map(g => `
+        <div class="project-card" onclick="openFeed('${g.id}', '${escStr(g.name)}', '${escStr(g.subject||'')}')">
+          <div class="project-card-header">
+            <div class="project-name">${g.name}</div>
+            <span class="badge badge-info">${g.subject || 'General'}</span>
+          </div>
+          ${g.description ? `<div class="project-desc">${g.description}</div>` : ''}
+          <div class="project-meta">Sem ${g.semester} · ${g.batch}${g.deadline ? ` · Deadline: ${new Date(g.deadline).toLocaleDateString('en-IN')}` : ''}</div>
+        </div>
+      `).join('')
+    } catch (err) { showToast('Failed to load groups', 'error') }
+  }
+
+  async function openFeed(groupId, name, subject) {
+    document.getElementById('groupsList').classList.add('hidden')
+    document.getElementById('feedWrap').classList.remove('hidden')
+    document.getElementById('feedHeader').innerHTML = `
+      <div class="project-feed-title"><div class="project-name">${name}</div>
+        <span class="badge badge-info">${subject}</span></div>
+    `
+    const feedEl = document.getElementById('projectFeed')
+    feedEl.innerHTML = `<div class="chat-loading">Loading…</div>`
+    try {
+      const posts = await db.projects.getPosts(groupId)
+      feedEl.innerHTML = ''
+      if (!posts.length) { feedEl.innerHTML = `<div class="chat-empty">No updates yet</div>`; return }
+      posts.forEach(p => feedEl.insertAdjacentHTML('beforeend', postHTML(p)))
+    } catch (err) { feedEl.innerHTML = `<div class="chat-empty">Load failed</div>` }
+
+    if (cleanupRealtime) cleanupRealtime()
+    cleanupRealtime = subscribeToProjectPosts(groupId, (post) => {
+      const feedEl = document.getElementById('projectFeed')
+      if (feedEl) feedEl.insertAdjacentHTML('afterbegin', postHTML(post))
+    })
+  }
+}
+
+function postHTML(p) {
+  const meta = STATUS_META[p.status] || { label: p.status, color: '#8b949e' }
+  return `
+    <div class="post-card" data-post-id="${p.id}">
+      <div class="post-header">
+        <div class="post-sender">${p.sender_name}</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge" style="background:${meta.color}20;color:${meta.color}">${meta.label}</span>
+          <button class="btn-outline btn-sm" onclick="openFeedbackModal('${p.id}')">+ Feedback</button>
+        </div>
+      </div>
+      ${p.text ? `<div class="post-text">${p.text}</div>` : ''}
+      ${p.media_url ? `<a href="${p.media_url}" class="msg-file-link" target="_blank">📎 ${p.file_name||'File'}</a>` : ''}
+      ${p.teacher_feedback ? `<div class="post-feedback">💬 Teacher: ${p.teacher_feedback}</div>` : ''}
+      <div class="post-time">${timeAgo(p.created_at)}</div>
+    </div>
+  `
+}
+
+function timeAgo(ts) {
+  const m = Math.floor((Date.now() - new Date(ts)) / 60000)
+  if (m < 1) return 'just now'; if (m < 60) return `${m}m ago`
+  const h = Math.floor(m/60); if (h < 24) return `${h}h ago`; return `${Math.floor(h/24)}d ago`
+}
+function escStr(s) { return String(s).replace(/'/g, "\\'") }
       subject,
       teacher: user.name,
       semester: null, // allow any semester
