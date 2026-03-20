@@ -60,65 +60,49 @@
 
 <!-- ════════════════════ ROUTER + PAGES ════════════════════ -->
 <script type="module">
-import { router } from './assets/js/router.js'
-import { getCurrentUser } from './assets/js/auth.js'
 import { initTheme } from './assets/js/theme.js'
+import { getCurrentUser } from './assets/js/auth.js'
+import { router } from './assets/js/router.js'
 
-// ── Page loaders ────────────────────────────────────────────────
-import { renderLogin }              from './assets/js/pages/login.js'
-import { renderAdminDashboard }     from './assets/js/pages/admin/dashboard.js'
-import {
-  renderAdminStudents,
-  renderAdminTeachers,
-  renderAdminLeave,
-  renderAdminNotices,
-  renderAdminAchievements,
-  renderAdminEvents,
-  renderAdminTimetable,
-  renderAdminMarks,
-  renderAdminAttendance
-} from './assets/js/pages/admin/admin-pages.js'
-import { renderStudentDashboard }   from './assets/js/pages/student/dashboard.js'
-import { renderStudentAttendance }  from './assets/js/pages/student/attendance.js'
-import { renderStudentMarks }       from './assets/js/pages/student/marks.js'
-import { renderStudentTimetable }   from './assets/js/pages/student/timetable.js'
-import { renderStudentLeave }       from './assets/js/pages/student/leave.js'
-import { renderStudentChat }        from './assets/js/pages/student/chat.js'
-import { renderStudentProjects }    from './assets/js/pages/student/projects.js'
-import { renderQRScan }             from './assets/js/pages/student/qr-scan.js'
-import { renderTeacherDashboard }   from './assets/js/pages/teacher/dashboard.js'
-import { renderTeacherAttendance }  from './assets/js/pages/teacher/attendance.js'
-import { renderMarksEntry }         from './assets/js/pages/teacher/marks-entry.js'
-import { renderTeacherTimetable }   from './assets/js/pages/teacher/timetable.js'
-import { renderTeacherChat }        from './assets/js/pages/teacher/chat.js'
-import { renderTeacherProjects }    from './assets/js/pages/teacher/projects.js'
-import { renderQRGenerate }         from './assets/js/pages/teacher/qr-generate.js'
+// Page imports
+import { renderLogin } from './assets/js/pages/login.js'
+import { renderAdminDashboard } from './assets/js/pages/admin/dashboard.js'
+import { renderAdminStudents, renderAdminTeachers, renderAdminLeave, renderAdminNotices, renderAdminAchievements, renderAdminEvents, renderAdminTimetable, renderAdminMarks, renderAdminAttendance } from './assets/js/pages/admin/admin-pages.js'
+import { renderStudentDashboard } from './assets/js/pages/student/dashboard.js'
+import { renderStudentAttendance } from './assets/js/pages/student/attendance.js'
+import { renderStudentMarks } from './assets/js/pages/student/marks.js'
+import { renderStudentTimetable } from './assets/js/pages/student/timetable.js'
+import { renderStudentLeave } from './assets/js/pages/student/leave.js'
+import { renderStudentChat } from './assets/js/pages/student/chat.js'
+import { renderStudentProjects } from './assets/js/pages/student/projects.js'
+import { renderQRScan } from './assets/js/pages/student/qr-scan.js'
+import { renderTeacherDashboard } from './assets/js/pages/teacher/dashboard.js'
+import { renderTeacherAttendance } from './assets/js/pages/teacher/attendance.js'
+import { renderMarksEntry } from './assets/js/pages/teacher/marks-entry.js'
+import { renderTeacherTimetable } from './assets/js/pages/teacher/timetable.js'
+import { renderTeacherChat } from './assets/js/pages/teacher/chat.js'
+import { renderTeacherProjects } from './assets/js/pages/teacher/projects.js'
+import { renderQRGenerate } from './assets/js/pages/teacher/qr-generate.js'
 
-// ── Register routes ──────────────────────────────────────────────
+// Register routes
 router.register('/login', { loader: renderLogin })
-
-// Admin
-router.register('/admin/dashboard',    { roles:['admin'], loader: renderAdminDashboard })
-router.register('/admin/students',     { roles:['admin'], loader: renderAdminStudents })
-router.register('/admin/teachers',     { roles:['admin'], loader: renderAdminTeachers })
-router.register('/admin/attendance',   { roles:['admin'], loader: renderAdminAttendance })
-router.register('/admin/marks',        { roles:['admin'], loader: renderAdminMarks })
-router.register('/admin/timetable',    { roles:['admin'], loader: renderAdminTimetable })
-router.register('/admin/leave',        { roles:['admin'], loader: renderAdminLeave })
-router.register('/admin/notices',      { roles:['admin'], loader: renderAdminNotices })
-router.register('/admin/events',       { roles:['admin'], loader: renderAdminEvents })
-router.register('/admin/achievements', { roles:['admin'], loader: renderAdminAchievements })
-
-// Teacher
-router.register('/teacher/dashboard',   { roles:['teacher'], loader: renderTeacherDashboard })
-router.register('/teacher/attendance',  { roles:['teacher'], loader: renderTeacherAttendance })
-router.register('/teacher/marks-entry', { roles:['teacher'], loader: renderMarksEntry })
-router.register('/teacher/timetable',   { roles:['teacher'], loader: renderTeacherTimetable })
-router.register('/teacher/chat',        { roles:['teacher'], loader: renderTeacherChat })
-router.register('/teacher/projects',    { roles:['teacher'], loader: renderTeacherProjects })
-router.register('/teacher/qr-generate', { roles:['teacher'], loader: renderQRGenerate })
-
-// Student
+router.register('/admin/dashboard',    { roles:['admin'],   loader: renderAdminDashboard })
+router.register('/admin/students',     { roles:['admin'],   loader: renderAdminStudents })
+router.register('/admin/teachers',     { roles:['admin'],   loader: renderAdminTeachers })
+router.register('/admin/attendance',   { roles:['admin'],   loader: renderAdminAttendance })
+router.register('/admin/marks',        { roles:['admin'],   loader: renderAdminMarks })
+router.register('/admin/timetable',    { roles:['admin'],   loader: renderAdminTimetable })
+router.register('/admin/leave',        { roles:['admin'],   loader: renderAdminLeave })
+router.register('/admin/notices',      { roles:['admin'],   loader: renderAdminNotices })
+router.register('/admin/events',       { roles:['admin'],   loader: renderAdminEvents })
+router.register('/admin/achievements', { roles:['admin'],   loader: renderAdminAchievements })
+router.register('/teacher/dashboard',  { roles:['teacher'], loader: renderTeacherDashboard })
+router.register('/teacher/attendance', { roles:['teacher'], loader: renderTeacherAttendance })
+router.register('/teacher/marks-entry',{ roles:['teacher'], loader: renderMarksEntry })
+router.register('/teacher/timetable',  { roles:['teacher'], loader: renderTeacherTimetable })
+router.register('/teacher/chat',       { roles:['teacher'], loader: renderTeacherChat })
+router.register('/teacher/projects',   { roles:['teacher'], loader: renderTeacherProjects })
+router.register('/teacher/qr-generate',{ roles:['teacher'], loader: renderQRGenerate })
 router.register('/student/dashboard',  { roles:['student'], loader: renderStudentDashboard })
 router.register('/student/attendance', { roles:['student'], loader: renderStudentAttendance })
 router.register('/student/marks',      { roles:['student'], loader: renderStudentMarks })
@@ -128,7 +112,7 @@ router.register('/student/chat',       { roles:['student'], loader: renderStuden
 router.register('/student/projects',   { roles:['student'], loader: renderStudentProjects })
 router.register('/student/qr-scan',    { roles:['student'], loader: renderQRScan })
 
-// ── Boot ────────────────────────────────────────────────────────
+// Boot
 function hideSplash() {
   const splash = document.getElementById('splash')
   if (!splash) return
@@ -137,20 +121,24 @@ function hideSplash() {
   setTimeout(() => splash.remove(), 650)
 }
 
-// Apply stored theme before any paint
 initTheme()
 
-// Minimum splash display time + boot
-setTimeout(() => {
-  hideSplash()
+window.addEventListener('load', () => {
   setTimeout(() => {
-    const user = getCurrentUser()
-    if (!user) {
-      window.location.hash = '#/login'
-    }
-    router.start()
-  }, 700)
-}, 1500)
+    hideSplash()
+    setTimeout(() => {
+      try {
+        const user = getCurrentUser()
+        if (!user) window.location.hash = '#/login'
+        router.start()
+      } catch(e) {
+        console.error('Boot error:', e)
+        window.location.hash = '#/login'
+        router.start()
+      }
+    }, 700)
+  }, 1500)
+})
 </script>
 </body>
 </html>
