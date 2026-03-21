@@ -1,144 +1,116 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#0d1117" />
-  <title>ECE Portal — GPT Chintamani</title>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <!-- External libs -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="assets/css/main.css" />
-
-  <!-- Supabase config — set these before the module loads -->
-  <script>
-    window.__ENV__ = {
-      SUPABASE_URL: 'https://YOUR_PROJECT_REF.supabase.co',
-      SUPABASE_KEY: 'YOUR_ANON_KEY'
-    }
-  </script>
-
-  <style>
-    /* Splash screen */
-    #splash {
-      position: fixed; inset: 0; background: #0d1117;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 9999; transition: opacity 0.6s, transform 0.6s;
-    }
-    #splash .splash-logo { font-size: 64px; margin-bottom: 16px; filter: drop-shadow(0 0 30px #00e5a0); animation: splashPulse 1.5s ease infinite; }
-    #splash .splash-title { font-size: 26px; font-weight: 800; color: #00e5a0; letter-spacing: -1px; }
-    #splash .splash-sub { font-size: 13px; color: #8b949e; margin-top: 6px; }
-    #splash .splash-spinner { width: 32px; height: 32px; border: 2px solid #30363d; border-top-color: #00e5a0; border-radius: 50%; animation: spin 0.7s linear infinite; margin-top: 40px; }
-    @keyframes splashPulse { 0%,100% { filter: drop-shadow(0 0 20px #00e5a0); } 50% { filter: drop-shadow(0 0 40px #00e5a0); } }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* toast animation */
-    @keyframes toastIn { from { opacity:0; transform:scale(0.85) translateY(-10px); } to { opacity:1; transform:scale(1) translateY(0); } }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#0d1117"/>
+<title>ECE Portal — GPT Chintamani</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="assets/css/main.css"/>
+<style>
+#splash{position:fixed;inset:0;background:#0d1117;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.6s,transform 0.6s}
+.splash-logo{font-size:64px;margin-bottom:16px;filter:drop-shadow(0 0 30px #00e5a0);animation:splashPulse 1.5s ease infinite}
+.splash-title{font-size:26px;font-weight:800;color:#00e5a0;letter-spacing:-1px}
+.splash-sub{font-size:13px;color:#8b949e;margin-top:6px}
+.splash-spinner{width:32px;height:32px;border:2px solid #30363d;border-top-color:#00e5a0;border-radius:50%;animation:spin 0.7s linear infinite;margin-top:40px}
+.splash-err{color:#ff5370;font-size:12px;margin-top:12px;padding:0 24px;text-align:center;display:none}
+@keyframes splashPulse{0%,100%{filter:drop-shadow(0 0 20px #00e5a0)}50%{filter:drop-shadow(0 0 40px #00e5a0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes toastIn{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
+</style>
 </head>
 <body>
-
-<!-- ════════════════════ SPLASH ════════════════════ -->
 <div id="splash">
   <div class="splash-logo">⚡</div>
   <div class="splash-title">ECE Portal</div>
   <div class="splash-sub">GPT Chintamani Government Polytechnic</div>
   <div class="splash-spinner"></div>
+  <div class="splash-err" id="splashErr"></div>
 </div>
-
-<!-- ════════════════════ APP ROOT ════════════════════ -->
 <div id="app"></div>
-
-<!-- ════════════════════ ROUTER + PAGES ════════════════════ -->
+<script>
+window.SUPABASE_URL='https://bjmrivbuyxsdlebbonrd.supabase.co'
+window.SUPABASE_KEY='sb_publishable_NBKAKHqjAPXQ3mFmW1Bg7g_S4bl3HlA'
+window._supabase=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false,storageKey:'ECE_session'}})
+window.getCurrentUser=function(){const s=sessionStorage.getItem('ECE_currentUser');return s?JSON.parse(s):null}
+window.showErr=function(m){const e=document.getElementById('splashErr');if(e){e.textContent=m;e.style.display='block'}}
+</script>
 <script type="module">
-import { initTheme } from './assets/js/theme.js'
-import { getCurrentUser } from './assets/js/auth.js'
-import { router } from './assets/js/router.js'
+import {initTheme} from './assets/js/theme.js'
+import {getCurrentUser} from './assets/js/auth.js'
+import {router} from './assets/js/router.js'
+import {renderLogin} from './assets/js/pages/login.js'
+import {renderAdminDashboard} from './assets/js/pages/admin/dashboard.js'
+import {renderAdminStudents,renderAdminTeachers,renderAdminLeave,renderAdminNotices,renderAdminAchievements,renderAdminEvents,renderAdminTimetable,renderAdminMarks,renderAdminAttendance} from './assets/js/pages/admin/admin-pages.js'
+import {renderStudentDashboard} from './assets/js/pages/student/dashboard.js'
+import {renderStudentAttendance} from './assets/js/pages/student/attendance.js'
+import {renderStudentMarks} from './assets/js/pages/student/marks.js'
+import {renderStudentTimetable} from './assets/js/pages/student/timetable.js'
+import {renderStudentLeave} from './assets/js/pages/student/leave.js'
+import {renderStudentChat} from './assets/js/pages/student/chat.js'
+import {renderStudentProjects} from './assets/js/pages/student/projects.js'
+import {renderQRScan} from './assets/js/pages/student/qr-scan.js'
+import {renderTeacherDashboard} from './assets/js/pages/teacher/dashboard.js'
+import {renderTeacherAttendance} from './assets/js/pages/teacher/attendance.js'
+import {renderMarksEntry} from './assets/js/pages/teacher/marks-entry.js'
+import {renderTeacherTimetable} from './assets/js/pages/teacher/timetable.js'
+import {renderTeacherChat} from './assets/js/pages/teacher/chat.js'
+import {renderTeacherProjects} from './assets/js/pages/teacher/projects.js'
+import {renderQRGenerate} from './assets/js/pages/teacher/qr-generate.js'
 
-// Page imports
-import { renderLogin } from './assets/js/pages/login.js'
-import { renderAdminDashboard } from './assets/js/pages/admin/dashboard.js'
-import { renderAdminStudents, renderAdminTeachers, renderAdminLeave, renderAdminNotices, renderAdminAchievements, renderAdminEvents, renderAdminTimetable, renderAdminMarks, renderAdminAttendance } from './assets/js/pages/admin/admin-pages.js'
-import { renderStudentDashboard } from './assets/js/pages/student/dashboard.js'
-import { renderStudentAttendance } from './assets/js/pages/student/attendance.js'
-import { renderStudentMarks } from './assets/js/pages/student/marks.js'
-import { renderStudentTimetable } from './assets/js/pages/student/timetable.js'
-import { renderStudentLeave } from './assets/js/pages/student/leave.js'
-import { renderStudentChat } from './assets/js/pages/student/chat.js'
-import { renderStudentProjects } from './assets/js/pages/student/projects.js'
-import { renderQRScan } from './assets/js/pages/student/qr-scan.js'
-import { renderTeacherDashboard } from './assets/js/pages/teacher/dashboard.js'
-import { renderTeacherAttendance } from './assets/js/pages/teacher/attendance.js'
-import { renderMarksEntry } from './assets/js/pages/teacher/marks-entry.js'
-import { renderTeacherTimetable } from './assets/js/pages/teacher/timetable.js'
-import { renderTeacherChat } from './assets/js/pages/teacher/chat.js'
-import { renderTeacherProjects } from './assets/js/pages/teacher/projects.js'
-import { renderQRGenerate } from './assets/js/pages/teacher/qr-generate.js'
+router.register('/login',{loader:renderLogin})
+router.register('/admin/dashboard',{roles:['admin'],loader:renderAdminDashboard})
+router.register('/admin/students',{roles:['admin'],loader:renderAdminStudents})
+router.register('/admin/teachers',{roles:['admin'],loader:renderAdminTeachers})
+router.register('/admin/attendance',{roles:['admin'],loader:renderAdminAttendance})
+router.register('/admin/marks',{roles:['admin'],loader:renderAdminMarks})
+router.register('/admin/timetable',{roles:['admin'],loader:renderAdminTimetable})
+router.register('/admin/leave',{roles:['admin'],loader:renderAdminLeave})
+router.register('/admin/notices',{roles:['admin'],loader:renderAdminNotices})
+router.register('/admin/events',{roles:['admin'],loader:renderAdminEvents})
+router.register('/admin/achievements',{roles:['admin'],loader:renderAdminAchievements})
+router.register('/teacher/dashboard',{roles:['teacher'],loader:renderTeacherDashboard})
+router.register('/teacher/attendance',{roles:['teacher'],loader:renderTeacherAttendance})
+router.register('/teacher/marks-entry',{roles:['teacher'],loader:renderMarksEntry})
+router.register('/teacher/timetable',{roles:['teacher'],loader:renderTeacherTimetable})
+router.register('/teacher/chat',{roles:['teacher'],loader:renderTeacherChat})
+router.register('/teacher/projects',{roles:['teacher'],loader:renderTeacherProjects})
+router.register('/teacher/qr-generate',{roles:['teacher'],loader:renderQRGenerate})
+router.register('/student/dashboard',{roles:['student'],loader:renderStudentDashboard})
+router.register('/student/attendance',{roles:['student'],loader:renderStudentAttendance})
+router.register('/student/marks',{roles:['student'],loader:renderStudentMarks})
+router.register('/student/timetable',{roles:['student'],loader:renderStudentTimetable})
+router.register('/student/leave',{roles:['student'],loader:renderStudentLeave})
+router.register('/student/chat',{roles:['student'],loader:renderStudentChat})
+router.register('/student/projects',{roles:['student'],loader:renderStudentProjects})
+router.register('/student/qr-scan',{roles:['student'],loader:renderQRScan})
 
-// Register routes
-router.register('/login', { loader: renderLogin })
-router.register('/admin/dashboard',    { roles:['admin'],   loader: renderAdminDashboard })
-router.register('/admin/students',     { roles:['admin'],   loader: renderAdminStudents })
-router.register('/admin/teachers',     { roles:['admin'],   loader: renderAdminTeachers })
-router.register('/admin/attendance',   { roles:['admin'],   loader: renderAdminAttendance })
-router.register('/admin/marks',        { roles:['admin'],   loader: renderAdminMarks })
-router.register('/admin/timetable',    { roles:['admin'],   loader: renderAdminTimetable })
-router.register('/admin/leave',        { roles:['admin'],   loader: renderAdminLeave })
-router.register('/admin/notices',      { roles:['admin'],   loader: renderAdminNotices })
-router.register('/admin/events',       { roles:['admin'],   loader: renderAdminEvents })
-router.register('/admin/achievements', { roles:['admin'],   loader: renderAdminAchievements })
-router.register('/teacher/dashboard',  { roles:['teacher'], loader: renderTeacherDashboard })
-router.register('/teacher/attendance', { roles:['teacher'], loader: renderTeacherAttendance })
-router.register('/teacher/marks-entry',{ roles:['teacher'], loader: renderMarksEntry })
-router.register('/teacher/timetable',  { roles:['teacher'], loader: renderTeacherTimetable })
-router.register('/teacher/chat',       { roles:['teacher'], loader: renderTeacherChat })
-router.register('/teacher/projects',   { roles:['teacher'], loader: renderTeacherProjects })
-router.register('/teacher/qr-generate',{ roles:['teacher'], loader: renderQRGenerate })
-router.register('/student/dashboard',  { roles:['student'], loader: renderStudentDashboard })
-router.register('/student/attendance', { roles:['student'], loader: renderStudentAttendance })
-router.register('/student/marks',      { roles:['student'], loader: renderStudentMarks })
-router.register('/student/timetable',  { roles:['student'], loader: renderStudentTimetable })
-router.register('/student/leave',      { roles:['student'], loader: renderStudentLeave })
-router.register('/student/chat',       { roles:['student'], loader: renderStudentChat })
-router.register('/student/projects',   { roles:['student'], loader: renderStudentProjects })
-router.register('/student/qr-scan',    { roles:['student'], loader: renderQRScan })
-
-// Boot
-function hideSplash() {
-  const splash = document.getElementById('splash')
-  if (!splash) return
-  splash.style.opacity = '0'
-  splash.style.transform = 'scale(1.04)'
-  setTimeout(() => splash.remove(), 650)
+function hideSplash(){
+  const s=document.getElementById('splash')
+  if(!s)return
+  s.style.opacity='0'
+  s.style.transform='scale(1.04)'
+  setTimeout(()=>s.remove(),650)
 }
 
-initTheme()
-
-window.addEventListener('load', () => {
-  setTimeout(() => {
+try{
+  initTheme()
+  setTimeout(()=>{
     hideSplash()
-    setTimeout(() => {
-      try {
-        const user = getCurrentUser()
-        if (!user) window.location.hash = '#/login'
-        router.start()
-      } catch(e) {
-        console.error('Boot error:', e)
-        window.location.hash = '#/login'
-        router.start()
-      }
-    }, 700)
-  }, 1500)
-})
+    setTimeout(()=>{
+      const user=getCurrentUser()
+      if(!user)window.location.hash='#/login'
+      router.start()
+    },600)
+  },1500)
+}catch(e){
+  window.showErr('Error: '+e.message)
+  console.error(e)
+}
 </script>
 </body>
 </html>
