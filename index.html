@@ -1,116 +1,1067 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
-<meta name="theme-color" content="#0d1117"/>
-<title>ECE Portal — GPT Chintamani</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
-<link rel="stylesheet" href="assets/css/main.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClipAgent Studio — Launch Your AI Business in 10 Minutes</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
-#splash{position:fixed;inset:0;background:#0d1117;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.6s,transform 0.6s}
-.splash-logo{font-size:64px;margin-bottom:16px;filter:drop-shadow(0 0 30px #00e5a0);animation:splashPulse 1.5s ease infinite}
-.splash-title{font-size:26px;font-weight:800;color:#00e5a0;letter-spacing:-1px}
-.splash-sub{font-size:13px;color:#8b949e;margin-top:6px}
-.splash-spinner{width:32px;height:32px;border:2px solid #30363d;border-top-color:#00e5a0;border-radius:50%;animation:spin 0.7s linear infinite;margin-top:40px}
-.splash-err{color:#ff5370;font-size:12px;margin-top:12px;padding:0 24px;text-align:center;display:none}
-@keyframes splashPulse{0%,100%{filter:drop-shadow(0 0 20px #00e5a0)}50%{filter:drop-shadow(0 0 40px #00e5a0)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes toastIn{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
+  :root {
+    --bg: #050810;
+    --surface: #0b0f1a;
+    --border: #1a2035;
+    --accent: #00f5a0;
+    --accent2: #00b4ff;
+    --accent3: #ff6b35;
+    --text: #e8eaf0;
+    --muted: #5a6080;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 32px; height: 32px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.15s ease;
+    mix-blend-mode: screen;
+    opacity: 0.5;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Noise overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  section, nav, footer { position: relative; z-index: 1; }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 4rem;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(5,8,16,0.8);
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--text); }
+
+  nav ul {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  nav ul a {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: color 0.2s;
+  }
+  nav ul a:hover { color: var(--accent); }
+
+  .nav-cta {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 0.6rem 1.4rem;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .nav-cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateX(-101%);
+    transition: transform 0.25s ease;
+  }
+  .nav-cta:hover::before { transform: translateX(0); }
+  .nav-cta:hover { color: var(--bg); }
+  .nav-cta span { position: relative; z-index: 1; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 4rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,245,160,0.08) 0%, transparent 70%);
+    top: -100px; left: -100px;
+    pointer-events: none;
+    animation: pulse 4s ease-in-out infinite;
+  }
+  .hero-glow2 {
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,180,255,0.06) 0%, transparent 70%);
+    bottom: 0; right: 10%;
+    pointer-events: none;
+    animation: pulse 6s ease-in-out infinite reverse;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.2s;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.35s;
+  }
+
+  .hero h1 .line2 { color: var(--accent); }
+  .hero h1 .line3 { color: var(--muted); font-weight: 400; font-size: 0.6em; }
+
+  .hero-sub {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.8;
+    margin-top: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.5s;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 3rem;
+    align-items: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.65s;
+  }
+
+  .btn-primary {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 1rem 2.5rem;
+    background: var(--accent);
+    color: var(--bg);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px rgba(0,245,160,0.3);
+  }
+
+  .btn-secondary {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 1rem 2rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    margin-top: 5rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border);
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.8s;
+  }
+  .stat-num {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--accent);
+    font-family: var(--mono);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-top: 0.4rem;
+  }
+
+  /* TERMINAL SECTION */
+  .terminal-section {
+    padding: 6rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+
+  .terminal-section h2 {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .terminal-section p {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.9;
+    margin-top: 1.5rem;
+  }
+
+  .terminal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: var(--mono);
+  }
+
+  .terminal-bar {
+    background: #0f1320;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c840; }
+  .terminal-title {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-left: auto;
+    margin-right: auto;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .terminal-body {
+    padding: 1.5rem;
+    font-size: 0.78rem;
+    line-height: 2;
+  }
+
+  .t-line { display: flex; gap: 0.75rem; }
+  .t-prompt { color: var(--accent); }
+  .t-cmd { color: var(--text); }
+  .t-out { color: var(--muted); padding-left: 1.5rem; }
+  .t-out.green { color: var(--accent); }
+  .t-out.blue { color: var(--accent2); }
+  .t-out.orange { color: var(--accent3); }
+
+  .t-cursor {
+    display: inline-block;
+    width: 8px; height: 14px;
+    background: var(--accent);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* HOW IT WORKS */
+  .how-section {
+    padding: 6rem 4rem;
+    border-top: 1px solid var(--border);
+  }
+  .how-section > .section-label { margin-bottom: 0.5rem; }
+  .how-section > h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 4rem;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .step {
+    background: var(--bg);
+    padding: 2.5rem 2rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .step::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  .step:hover { background: var(--surface); }
+  .step:hover::before { transform: scaleX(1); }
+
+  .step-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
+  }
+  .step-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  .step h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+  .step p {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  /* PRICING */
+  .pricing-section {
+    padding: 6rem 4rem;
+    border-top: 1px solid var(--border);
+  }
+  .pricing-section > .section-label { margin-bottom: 0.5rem; }
+  .pricing-section > h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+  .pricing-section > p {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 4rem;
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .price-card {
+    background: var(--bg);
+    padding: 2.5rem 2rem;
+    position: relative;
+  }
+  .price-card.featured {
+    background: var(--surface);
+    border-top: 2px solid var(--accent);
+  }
+
+  .price-tag {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.75rem;
+  }
+  .price-card h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+  }
+  .price-amount {
+    font-family: var(--mono);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+  .price-amount span {
+    font-size: 1rem;
+    color: var(--muted);
+  }
+  .price-period {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+  .price-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .price-features li {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    display: flex;
+    gap: 0.5rem;
+  }
+  .price-features li::before {
+    content: '';
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* STACK SECTION */
+  .stack-section {
+    padding: 6rem 4rem;
+    border-top: 1px solid var(--border);
+  }
+  .stack-section > .section-label { margin-bottom: 0.5rem; }
+  .stack-section > h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 4rem;
+  }
+
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .stack-item {
+    background: var(--bg);
+    padding: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    transition: background 0.2s;
+  }
+  .stack-item:hover { background: var(--surface); }
+
+  .stack-badge {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .stack-badge.blue { border-color: var(--accent2); color: var(--accent2); }
+  .stack-badge.orange { border-color: var(--accent3); color: var(--accent3); }
+
+  .stack-info h4 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .stack-info p {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: 8rem 4rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    width: 800px; height: 400px;
+    background: radial-gradient(ellipse, rgba(0,245,160,0.06) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .cta-section h2 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+  .cta-section h2 span { color: var(--accent); }
+
+  .cta-section p {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 3rem;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.8;
+  }
+
+  .cta-input-group {
+    display: flex;
+    gap: 0;
+    max-width: 480px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .cta-input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-right: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .cta-input:focus { border-color: var(--accent); }
+  .cta-input::placeholder { color: var(--muted); }
+
+  .cta-btn {
+    padding: 1rem 2rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: none;
+    transition: all 0.2s;
+  }
+  .cta-btn:hover {
+    background: #fff;
+    box-shadow: 0 0 40px rgba(0,245,160,0.4);
+  }
+
+  .cta-note {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  footer .logo { font-size: 0.9rem; }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--accent); }
+
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    nav ul { display: none; }
+    .hero, .terminal-section, .how-section, .pricing-section,
+    .stack-section, .cta-section { padding: 4rem 1.5rem; }
+    .terminal-section { grid-template-columns: 1fr; }
+    .steps, .pricing-grid { grid-template-columns: 1fr; }
+    .stack-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 1.5rem; flex-wrap: wrap; }
+    footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+    .footer-links { flex-wrap: wrap; justify-content: center; }
+    .cta-input-group { flex-direction: column; }
+    .cta-input { border-right: 1px solid var(--border); border-bottom: none; }
+  }
 </style>
 </head>
 <body>
-<div id="splash">
-  <div class="splash-logo">⚡</div>
-  <div class="splash-title">ECE Portal</div>
-  <div class="splash-sub">GPT Chintamani Government Polytechnic</div>
-  <div class="splash-spinner"></div>
-  <div class="splash-err" id="splashErr"></div>
-</div>
-<div id="app"></div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <div class="logo">Clip<span>Agent</span> Studio</div>
+  <ul>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="https://github.com" target="_blank">GitHub</a></li>
+  </ul>
+  <a href="#waitlist" class="nav-cta"><span>Join Waitlist</span></a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <div class="hero-tag">Open Source · Zero Budget · Global</div>
+
+  <h1>
+    Launch your<br>
+    <span class="line2">AI Business</span><br>
+    <span class="line3">in 10 minutes.</span>
+  </h1>
+
+  <p class="hero-sub">
+    Orchestrate a full company of AI agents — CEO, developers, marketers, support — from one dashboard. No DevOps. No funding. No limits.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#waitlist" class="btn-primary">Get Early Access</a>
+    <a href="https://github.com" target="_blank" class="btn-secondary"> Star on GitHub</a>
+  </div>
+
+  <div class="hero-stats">
+    <div>
+      <div class="stat-num">68K+</div>
+      <div class="stat-label">GitHub Stars</div>
+    </div>
+    <div>
+      <div class="stat-num">$0</div>
+      <div class="stat-label">To Get Started</div>
+    </div>
+    <div>
+      <div class="stat-num">10min</div>
+      <div class="stat-label">To First Agent</div>
+    </div>
+    <div>
+      <div class="stat-num"></div>
+      <div class="stat-label">Business Templates</div>
+    </div>
+  </div>
+</section>
+
+<!-- TERMINAL -->
+<section class="terminal-section" id="how">
+  <div class="reveal">
+    <div class="section-label">// Zero to Running</div>
+    <h2>One command.<br>Entire company.</h2>
+    <p>
+      No cloud accounts. No credit card. No DevOps degree.<br><br>
+      ClipAgent Studio bundles Paperclip + agency-agents + public-apis into a single install. Your AI org is live before your coffee gets cold.
+    </p>
+  </div>
+
+  <div class="terminal reveal">
+    <div class="terminal-bar">
+      <div class="dot r"></div>
+      <div class="dot y"></div>
+      <div class="dot g"></div>
+      <div class="terminal-title">terminal — clipagent onboard</div>
+    </div>
+    <div class="terminal-body">
+      <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">npx clipagent onboard --yes</span></div>
+      <div class="t-out blue"> Checking environment...</div>
+      <div class="t-out green"> Node.js 20+ found</div>
+      <div class="t-out green"> Paperclip core loaded</div>
+      <div class="t-out green"> Agency agents mounted</div>
+      <div class="t-out green"> Public APIs connected (312 free APIs)</div>
+      <div class="t-out blue"> Choose a company template:</div>
+      <div class="t-out">&nbsp;&nbsp;[1] Marketing Agency</div>
+      <div class="t-out">&nbsp;&nbsp;[2] Dev Shop</div>
+      <div class="t-out">&nbsp;&nbsp;[3] Content Studio</div>
+      <div class="t-out">&nbsp;&nbsp;[4] Customer Support</div>
+      <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">1</span></div>
+      <div class="t-out orange"> Spawning agents: CEO · CMO · Copywriter · Analyst · Reddit Ninja</div>
+      <div class="t-out green"> Your AI company is live  localhost:3000</div>
+      <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"><span class="t-cursor"></span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="section-label">// The Flow</div>
+  <h2 class="reveal">How ClipAgent Works</h2>
+
+  <div class="steps">
+    <div class="step reveal">
+      <div class="step-num">01 / Pick</div>
+      <div class="step-icon"></div>
+      <h3>Choose a Template</h3>
+      <p>Marketing agency, dev shop, content studio, support team. Pick from ClipMart's growing library of pre-built AI companies.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">02 / Configure</div>
+      <div class="step-icon"></div>
+      <h3>Set Goals & Budget</h3>
+      <p>Define your company's mission. Set AI token budgets. Configure reporting structure. Agents inherit context automatically.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">03 / Launch</div>
+      <div class="step-icon"></div>
+      <h3>Agents Go to Work</h3>
+      <p>Your AI team runs 24/7. CEO delegates to agents. Agents complete tasks, log work, and escalate blockers — just like humans.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">04 / Monitor</div>
+      <div class="step-icon"></div>
+      <h3>You Stay in Control</h3>
+      <p>One dashboard. All activity, costs, outputs, and approvals in one place. You're the board. Agents are the employees.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section class="stack-section" id="stack">
+  <div class="section-label">// Built On Giants</div>
+  <h2 class="reveal">100% Open Source Stack</h2>
+
+  <div class="stack-grid">
+    <div class="stack-item reveal">
+      <div class="stack-badge">Core</div>
+      <div class="stack-info">
+        <h4>Paperclip</h4>
+        <p>Agent orchestration layer. Org charts, budgets, governance, heartbeats. 68K GitHub stars.</p>
+      </div>
+    </div>
+    <div class="stack-item reveal">
+      <div class="stack-badge">Agents</div>
+      <div class="stack-info">
+        <h4>Agency Agents</h4>
+        <p>Pre-built specialist agents — frontend wizard, Reddit ninja, QA tester, UX researcher, brand guardian.</p>
+      </div>
+    </div>
+    <div class="stack-item reveal">
+      <div class="stack-badge orange">Evolution</div>
+      <div class="stack-info">
+        <h4>Automaton</h4>
+        <p>Self-improving agents that earn compute, evolve skills, and replicate autonomously.</p>
+      </div>
+    </div>
+    <div class="stack-item reveal">
+      <div class="stack-badge blue">Data</div>
+      <div class="stack-info">
+        <h4>Public APIs</h4>
+        <p>312+ free APIs connected out of the box. News, finance, weather, social — zero cost data layer.</p>
+      </div>
+    </div>
+    <div class="stack-item reveal">
+      <div class="stack-badge blue">Infra</div>
+      <div class="stack-info">
+        <h4>Kubernetes</h4>
+        <p>Scale from laptop to cloud without changing config. Multi-company isolation built in.</p>
+      </div>
+    </div>
+    <div class="stack-item reveal">
+      <div class="stack-badge">Domain</div>
+      <div class="stack-info">
+        <h4>FreeDomain</h4>
+        <p>Launch your hosted ClipAgent instance with a free domain. Zero cost to go live.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="section-label">// Pricing</div>
+  <h2 class="reveal">Start Free. Scale When Ready.</h2>
+  <p class="reveal">No credit card. No lock-in. Open source forever.</p>
+
+  <div class="pricing-grid">
+    <div class="price-card reveal">
+      <div class="price-tag">// Self-Hosted</div>
+      <h3>Open Source</h3>
+      <div class="price-amount">$0</div>
+      <div class="price-period">forever free</div>
+      <ul class="price-features">
+        <li>Full Paperclip + Agency Agents</li>
+        <li>Unlimited agents</li>
+        <li>Self-hosted on your machine</li>
+        <li>MIT License</li>
+        <li>Community support</li>
+      </ul>
+    </div>
+    <div class="price-card featured reveal">
+      <div class="price-tag">// Most Popular</div>
+      <h3>Pro Hosted</h3>
+      <div class="price-amount">$9<span>/mo</span></div>
+      <div class="price-period">managed cloud</div>
+      <ul class="price-features">
+        <li>Everything in Open Source</li>
+        <li>Managed hosting (no DevOps)</li>
+        <li>5 company workspaces</li>
+        <li>Usage dashboard</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="price-card reveal">
+      <div class="price-tag">// Freelancers</div>
+      <h3>Agency</h3>
+      <div class="price-amount">$49<span>/mo</span></div>
+      <div class="price-period">white-label</div>
+      <ul class="price-features">
+        <li>White-label dashboard</li>
+        <li>Custom branding</li>
+        <li>Client workspaces</li>
+        <li>Revenue sharing</li>
+        <li>ClipMart templates</li>
+      </ul>
+    </div>
+    <div class="price-card reveal">
+      <div class="price-tag">// Scale</div>
+      <h3>Enterprise</h3>
+      <div class="price-amount">$199<span>/mo</span></div>
+      <div class="price-period">full power</div>
+      <ul class="price-features">
+        <li>Unlimited companies</li>
+        <li>Custom agent training</li>
+        <li>SSO + audit logs</li>
+        <li>SLA guarantee</li>
+        <li>Dedicated support</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="waitlist">
+  <h2 class="reveal">Your AI company<br><span>starts today.</span></h2>
+  <p class="reveal">Join 2,000+ founders building zero-human companies with ClipAgent Studio. Free early access, no credit card required.</p>
+
+  <div class="cta-input-group reveal">
+    <input type="email" class="cta-input" placeholder="you@startup.com">
+    <button class="cta-btn">Get Access</button>
+  </div>
+  <div class="cta-note reveal"> Free forever tier &nbsp;·&nbsp;  No spam &nbsp;·&nbsp;  Open source</div>
+</section>
+
+<footer>
+  <div class="logo">Clip<span>Agent</span> Studio</div>
+  <ul class="footer-links">
+    <li><a href="https://github.com" target="_blank">GitHub</a></li>
+    <li><a href="#">Docs</a></li>
+    <li><a href="#">ClipMart</a></li>
+    <li><a href="#">Discord</a></li>
+    <li><a href="#">Twitter</a></li>
+  </ul>
+  <div class="footer-copy">© 2026 ClipAgent Studio — MIT License</div>
+</footer>
+
 <script>
-window.SUPABASE_URL='https://bjmrivbuyxsdlebbonrd.supabase.co'
-window.SUPABASE_KEY='sb_publishable_NBKAKHqjAPXQ3mFmW1Bg7g_S4bl3HlA'
-window._supabase=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false,storageKey:'ECE_session'}})
-window.getCurrentUser=function(){const s=sessionStorage.getItem('ECE_currentUser');return s?JSON.parse(s):null}
-window.showErr=function(m){const e=document.getElementById('splashErr');if(e){e.textContent=m;e.style.display='block'}}
-</script>
-<script type="module">
-import {initTheme} from './assets/js/theme.js'
-import {getCurrentUser} from './assets/js/auth.js'
-import {router} from './assets/js/router.js'
-import {renderLogin} from './assets/js/pages/login.js'
-import {renderAdminDashboard} from './assets/js/pages/admin/dashboard.js'
-import {renderAdminStudents,renderAdminTeachers,renderAdminLeave,renderAdminNotices,renderAdminAchievements,renderAdminEvents,renderAdminTimetable,renderAdminMarks,renderAdminAttendance} from './assets/js/pages/admin/admin-pages.js'
-import {renderStudentDashboard} from './assets/js/pages/student/dashboard.js'
-import {renderStudentAttendance} from './assets/js/pages/student/attendance.js'
-import {renderStudentMarks} from './assets/js/pages/student/marks.js'
-import {renderStudentTimetable} from './assets/js/pages/student/timetable.js'
-import {renderStudentLeave} from './assets/js/pages/student/leave.js'
-import {renderStudentChat} from './assets/js/pages/student/chat.js'
-import {renderStudentProjects} from './assets/js/pages/student/projects.js'
-import {renderQRScan} from './assets/js/pages/student/qr-scan.js'
-import {renderTeacherDashboard} from './assets/js/pages/teacher/dashboard.js'
-import {renderTeacherAttendance} from './assets/js/pages/teacher/attendance.js'
-import {renderMarksEntry} from './assets/js/pages/teacher/marks-entry.js'
-import {renderTeacherTimetable} from './assets/js/pages/teacher/timetable.js'
-import {renderTeacherChat} from './assets/js/pages/teacher/chat.js'
-import {renderTeacherProjects} from './assets/js/pages/teacher/projects.js'
-import {renderQRGenerate} from './assets/js/pages/teacher/qr-generate.js'
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
 
-router.register('/login',{loader:renderLogin})
-router.register('/admin/dashboard',{roles:['admin'],loader:renderAdminDashboard})
-router.register('/admin/students',{roles:['admin'],loader:renderAdminStudents})
-router.register('/admin/teachers',{roles:['admin'],loader:renderAdminTeachers})
-router.register('/admin/attendance',{roles:['admin'],loader:renderAdminAttendance})
-router.register('/admin/marks',{roles:['admin'],loader:renderAdminMarks})
-router.register('/admin/timetable',{roles:['admin'],loader:renderAdminTimetable})
-router.register('/admin/leave',{roles:['admin'],loader:renderAdminLeave})
-router.register('/admin/notices',{roles:['admin'],loader:renderAdminNotices})
-router.register('/admin/events',{roles:['admin'],loader:renderAdminEvents})
-router.register('/admin/achievements',{roles:['admin'],loader:renderAdminAchievements})
-router.register('/teacher/dashboard',{roles:['teacher'],loader:renderTeacherDashboard})
-router.register('/teacher/attendance',{roles:['teacher'],loader:renderTeacherAttendance})
-router.register('/teacher/marks-entry',{roles:['teacher'],loader:renderMarksEntry})
-router.register('/teacher/timetable',{roles:['teacher'],loader:renderTeacherTimetable})
-router.register('/teacher/chat',{roles:['teacher'],loader:renderTeacherChat})
-router.register('/teacher/projects',{roles:['teacher'],loader:renderTeacherProjects})
-router.register('/teacher/qr-generate',{roles:['teacher'],loader:renderQRGenerate})
-router.register('/student/dashboard',{roles:['student'],loader:renderStudentDashboard})
-router.register('/student/attendance',{roles:['student'],loader:renderStudentAttendance})
-router.register('/student/marks',{roles:['student'],loader:renderStudentMarks})
-router.register('/student/timetable',{roles:['student'],loader:renderStudentTimetable})
-router.register('/student/leave',{roles:['student'],loader:renderStudentLeave})
-router.register('/student/chat',{roles:['student'],loader:renderStudentChat})
-router.register('/student/projects',{roles:['student'],loader:renderStudentProjects})
-router.register('/student/qr-scan',{roles:['student'],loader:renderQRScan})
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 4 + 'px';
+    cursor.style.top = my - 4 + 'px';
+  });
 
-function hideSplash(){
-  const s=document.getElementById('splash')
-  if(!s)return
-  s.style.opacity='0'
-  s.style.transform='scale(1.04)'
-  setTimeout(()=>s.remove(),650)
-}
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx - 16 + 'px';
+    ring.style.top = ry - 16 + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
 
-try{
-  initTheme()
-  setTimeout(()=>{
-    hideSplash()
-    setTimeout(()=>{
-      const user=getCurrentUser()
-      if(!user)window.location.hash='#/login'
-      router.start()
-    },600)
-  },1500)
-}catch(e){
-  window.showErr('Error: '+e.message)
-  console.error(e)
-}
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+
+  // Counter animation
+  function animateCount(el, target, suffix = '') {
+    let start = 0;
+    const dur = 2000;
+    const step = timestamp => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / dur, 1);
+      const val = Math.floor(progress * target);
+      el.textContent = val.toLocaleString() + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  const statsObs = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) {
+      const nums = document.querySelectorAll('.stat-num');
+      animateCount(nums[0], 68000, '+');
+      statsObs.disconnect();
+    }
+  });
+  const statsEl = document.querySelector('.hero-stats');
+  if (statsEl) statsObs.observe(statsEl);
+
+  // Waitlist button
+  document.querySelector('.cta-btn').addEventListener('click', () => {
+    const input = document.querySelector('.cta-input');
+    if (input.value.includes('@')) {
+      input.value = '';
+      input.placeholder = ' You\'re on the list!';
+      input.style.borderColor = 'var(--accent)';
+    }
+  });
 </script>
 </body>
 </html>
