@@ -3819,20 +3819,38 @@
         <button class="img-viewer-download" id="imgViewerDownload"><i class="fas fa-download"></i> Save</button>
     </div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-
     <script>
     // ── Supabase Configuration ────────────────────────────────────────────────
     window.SUPABASE_URL = 'https://bjmrivbuyxsdlebbonrd.supabase.co';
     window.SUPABASE_KEY = 'sb_publishable_NBKAKHqjAPXQ3mFmW1Bg7g_S4bl3HlA';
-    window._supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY, {
-        auth: {
-            autoRefreshToken: true,
-            persistSession: true,
-            detectSessionInUrl: false,
-            storageKey: 'ECE_session'
+
+    function _initSupabase() {
+        try {
+            if (typeof supabase === 'undefined') throw new Error('Supabase CDN not loaded');
+            window._supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY, {
+                auth: {
+                    autoRefreshToken: true,
+                    persistSession: true,
+                    detectSessionInUrl: false,
+                    storageKey: 'ECE_session'
+                }
+            });
+            console.log('✅ Supabase initialized');
+        } catch(e) {
+            console.error('❌ Supabase init failed:', e.message);
+            window._supabase = null;
         }
-    });
+    }
+
+    // Init immediately if CDN already loaded, else retry
+    if (typeof supabase !== 'undefined') {
+        _initSupabase();
+    } else {
+        document.querySelector('script[src*="supabase"]').addEventListener('load', _initSupabase);
+        // Fallback retry
+        setTimeout(_initSupabase, 2000);
+    }
+
     window.getCurrentUser = function () {
         const s = sessionStorage.getItem('ECE_currentUser');
         return s ? JSON.parse(s) : null;
@@ -3849,6 +3867,14 @@
     // to work via JSON.parse(localStorage.getItem(...)) shims below.
 
     const _sb = window._supabase;
+
+    // Safe Supabase getter — always returns current client even if init was delayed
+    function getSB() {
+        if (window._supabase) return window._supabase;
+        // Try reinit if missed
+        if (typeof supabase !== 'undefined' && !window._supabase) _initSupabase();
+        return window._supabase;
+    }
 
     // In-memory cache – mirrors old localStorage buckets
     const _cache = {
@@ -3876,25 +3902,25 @@
 
     // ---- DB write helpers ----
     async function dbUpsert(table, row) {
-        const { error } = await _sb.from(table).upsert(row, { onConflict: 'id' });
+        const { error } = await getSB().from(table).upsert(row, { onConflict: 'id' });
         if (error) console.error(`dbUpsert ${table}:`, error.message);
         return !error;
     }
 
     async function dbInsert(table, row) {
-        const { error } = await _sb.from(table).insert(row);
+        const { error } = await getSB().from(table).insert(row);
         if (error) console.error(`dbInsert ${table}:`, error.message);
         return !error;
     }
 
     async function dbDelete(table, id) {
-        const { error } = await _sb.from(table).delete().eq('id', id);
+        const { error } = await getSB().from(table).delete().eq('id', id);
         if (error) console.error(`dbDelete ${table}:`, error.message);
         return !error;
     }
 
     async function dbUpdate(table, id, patch) {
-        const { error } = await _sb.from(table).update(patch).eq('id', id);
+        const { error } = await getSB().from(table).update(patch).eq('id', id);
         if (error) console.error(`dbUpdate ${table}:`, error.message);
         return !error;
     }
@@ -3907,7 +3933,7 @@
             'timetable','achievements','marks'
         ];
         const results = await Promise.all(
-            tables.map(t => _sb.from(t).select('*'))
+            tables.map(t => getSB().from(t).select('*'))
         );
         const keys = [
             'users','attendance','messages','events','notices',
@@ -3931,7 +3957,7 @@
         });
 
         // msgReadReceipts – stored as single row in a kv table
-        const { data: kv } = await _sb.from('kv_store').select('*').eq('key', 'msgReadReceipts').maybeSingle();
+        const { data: kv } = await getSB().from('kv_store').select('*').eq('key', 'msgReadReceipts').maybeSingle();
         _cache.msgReadReceipts = kv ? (JSON.parse(kv.value || '{}')) : {};
     }
 
@@ -4096,7 +4122,7 @@
 
     async function syncMsgReadReceipts(obj) {
         _cache.msgReadReceipts = obj;
-        await _sb.from('kv_store').upsert({ key:'msgReadReceipts', value: JSON.stringify(obj) }, { onConflict:'key' });
+        await getSB().from('kv_store').upsert({ key:'msgReadReceipts', value: JSON.stringify(obj) }, { onConflict:'key' });
     }
 
     // ---- Mark batch chat seen (updates seenBy for all msgs in batch) ----
@@ -4189,7 +4215,7 @@
         showLoader();
 
         // Query Supabase directly for the user
-        const { data: users, error } = await _sb.from('users').select('*').eq('email', email).eq('password', pwd);
+        const { data: users, error } = await getSB().from('users').select('*').eq('email', email).eq('password', pwd);
         if (error || !users || users.length === 0) {
             hideLoader();
             showLoginError('Invalid email or password');
@@ -8335,27 +8361,11 @@
             setTimeout(() => { splash.style.display = 'none'; }, 650);
         }
 
-        // Load all data from Supabase first
-        try {
-            await loadAllData();
-        } catch(e) {
-            console.error('Supabase load error:', e);
-        }
-
-        initData(); // no-op, just keeps the call for safety
-        purgeExpiredMedia();
-        purgeExpiredProjectMedia();
-        setInterval(() => { purgeExpiredMedia(); purgeExpiredProjectMedia(); }, 10 * 60 * 1000);
-
-        // Check for existing session
-        const savedStr = sessionStorage.getItem('ECE_currentUser');
-
-        hideSplash();
-        setTimeout(() => {
+        function showLoginScreen() {
+            const savedStr = sessionStorage.getItem('ECE_currentUser');
             if (savedStr) {
                 try {
                     const savedUser = JSON.parse(savedStr);
-                    // Re-fetch user from cache to get latest data
                     const fresh = _cache.users.find(u => u.id === savedUser.id);
                     currentUser = fresh || savedUser;
                     currentRole = currentUser.role;
@@ -8369,7 +8379,33 @@
             } else {
                 document.getElementById('loginScreen').classList.add('active');
             }
-        }, 150);
+        }
+
+        // Always hide splash after 5s max no matter what
+        const splashTimeout = setTimeout(() => {
+            hideSplash();
+            setTimeout(showLoginScreen, 200);
+        }, 5000);
+
+        // Try loading Supabase data with 4s timeout
+        try {
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Supabase timeout')), 4000)
+            );
+            await Promise.race([loadAllData(), timeoutPromise]);
+        } catch(e) {
+            console.warn('Supabase load warning:', e.message);
+            // Continue anyway — login will query Supabase directly
+        }
+
+        clearTimeout(splashTimeout);
+        initData();
+        purgeExpiredMedia();
+        purgeExpiredProjectMedia();
+        setInterval(() => { purgeExpiredMedia(); purgeExpiredProjectMedia(); }, 10 * 60 * 1000);
+
+        hideSplash();
+        setTimeout(showLoginScreen, 200);
     };
     </script>
 
