@@ -3883,18 +3883,21 @@
         timetable: [], achievements: [], marks: [], msgReadReceipts: {}
     };
 
+    // Save ORIGINAL localStorage.getItem BEFORE overriding (prevents infinite loop)
+    const _origGet = localStorage.getItem.bind(localStorage);
+    const _origSet = localStorage.setItem.bind(localStorage);
+
     // localStorage shim – reads from _cache so legacy code stays untouched
     const _lsGet = (key) => {
         if (key === 'msgReadReceipts') return JSON.stringify(_cache.msgReadReceipts || {});
         if (key === 'currentUser') return sessionStorage.getItem('ECE_currentUser');
-        if (key === 'ece_theme') return localStorage.getItem('ece_theme');
-        if (key === 'noticesLastRead') return localStorage.getItem('noticesLastRead') || '0';
+        if (key === 'ece_theme') return _origGet('ece_theme');         // use original!
+        if (key === 'noticesLastRead') return _origGet('noticesLastRead') || '0'; // use original!
         const arr = _cache[key];
         return arr !== undefined ? JSON.stringify(arr) : null;
     };
 
     // Override the global localStorage.getItem so all old reads go through cache
-    const _origGet = localStorage.getItem.bind(localStorage);
     localStorage.getItem = (key) => {
         const shim = _lsGet(key);
         return shim !== null ? shim : _origGet(key);
@@ -4147,14 +4150,12 @@
         return updated;
     }
 
-    // ---- Shim: localStorage.setItem → no-op for app data (Supabase owns it) ----
-    // Theme and noticesLastRead are still stored locally
-    const _origSet = localStorage.setItem.bind(localStorage);
+    // ---- Shim: localStorage.setItem → only allow theme + noticesLastRead ----
     localStorage.setItem = (key, value) => {
         if (key === 'ece_theme' || key === 'noticesLastRead') {
             return _origSet(key, value);
         }
-        // Ignore all other setItem calls (data is managed by Supabase sync helpers)
+        // Ignore all other setItem calls (data managed by Supabase)
     };
 
     // ---- initData: no-op (Supabase is seeded via SQL, not JS) ----
