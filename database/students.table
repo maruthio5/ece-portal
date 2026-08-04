@@ -1,0 +1,19 @@
+{
+  "fields": [
+    { "field": "id", "type": "string", "required": true },
+    { "field": "name", "type": "string", "required": true },
+    { "field": "roll_number", "type": "string", "required": true },
+    { "field": "semester", "type": "number", "required": true },
+    { "field": "department", "type": "enum", "enums": ["Computer Science", "Electronics", "Mechanical", "Civil", "Electrical", "Other"] },
+    { "field": "email", "type": "string" },
+    { "field": "phone", "type": "string" },
+    { "field": "enrollment_year", "type": "number" }
+  ],
+  "data": [
+    { "id": "s1", "name": "Aarav Sharma", "roll_number": "CS2024001", "semester": 4, "department": "Computer Science", "email": "aarav.s@college.edu", "phone": "9876543210", "enrollment_year": 2024 },
+    { "id": "s2", "name": "Priya Patel", "roll_number": "CS2024002", "semester": 4, "department": "Computer Science", "email": "priya.p@college.edu", "phone": "9876543211", "enrollment_year": 2024 },
+    { "id": "s3", "name": "Rohan Gupta", "roll_number": "EC2024001", "semester": 4, "department": "Electronics", "email": "rohan.g@college.edu", "phone": "9876543212", "enrollment_year": 2024 },
+    { "id": "s4", "name": "Ananya Reddy", "roll_number": "ME2024001", "semester": 4, "department": "Mechanical", "email": "ananya.r@college.edu", "phone": "9876543213", "enrollment_year": 2024 },
+    { "id": "s5", "name": "Vikram Singh", "roll_number": "CS2024003", "semester": 3, "department": "Computer Science", "email": "vikram.s@college.edu", "phone": "9876543214", "enrollment_year": 2024 }
+  ]
+}

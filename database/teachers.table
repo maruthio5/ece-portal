@@ -1,0 +1,18 @@
+{
+  "fields": [
+    { "field": "id", "type": "string", "required": true },
+    { "field": "name", "type": "string", "required": true },
+    { "field": "employee_id", "type": "string", "required": true },
+    { "field": "department", "type": "string" },
+    { "field": "email", "type": "string" },
+    { "field": "phone", "type": "string" },
+    { "field": "subjects", "type": "string" },
+    { "field": "designation", "type": "enum", "enums": ["Professor", "Associate Professor", "Assistant Professor", "Lecturer", "HOD"] }
+  ],
+  "data": [
+    { "id": "t1", "name": "Dr. Rajesh Kumar", "employee_id": "ECE001", "department": "Electronics", "email": "rajesh.k@gpce.edu", "phone": "9876500001", "subjects": "Digital Electronics, Signals & Systems", "designation": "HOD" },
+    { "id": "t2", "name": "Prof. Meena Iyer", "employee_id": "ECE002", "department": "Electronics", "email": "meena.i@gpce.edu", "phone": "9876500002", "subjects": "Communication Systems, Analog Circuits", "designation": "Associate Professor" },
+    { "id": "t3", "name": "Mr. Suresh Rao", "employee_id": "ECE003", "department": "Electronics", "email": "suresh.r@gpce.edu", "phone": "9876500003", "subjects": "Microprocessors, Embedded Systems", "designation": "Assistant Professor" },
+    { "id": "t4", "name": "Ms. Kavya Nair", "employee_id": "CS001", "department": "Computer Science", "email": "kavya.n@gpce.edu", "phone": "9876500004", "subjects": "Data Structures, Database Systems", "designation": "Assistant Professor" }
+  ]
+}

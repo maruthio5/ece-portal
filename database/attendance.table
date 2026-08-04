@@ -1,0 +1,18 @@
+{
+  "fields": [
+    { "field": "id", "type": "string", "required": true },
+    { "field": "student_id", "type": "string", "required": true },
+    { "field": "date", "type": "string", "required": true },
+    { "field": "status", "type": "enum", "enums": ["Present", "Absent", "Late", "Excused"] },
+    { "field": "subject", "type": "string" },
+    { "field": "semester", "type": "number" }
+  ],
+  "data": [
+    { "id": "a1", "student_id": "s1", "date": "2026-08-01", "status": "Present", "subject": "Data Structures", "semester": 4 },
+    { "id": "a2", "student_id": "s1", "date": "2026-08-02", "status": "Present", "subject": "Database Systems", "semester": 4 },
+    { "id": "a3", "student_id": "s2", "date": "2026-08-01", "status": "Present", "subject": "Data Structures", "semester": 4 },
+    { "id": "a4", "student_id": "s2", "date": "2026-08-02", "status": "Late", "subject": "Database Systems", "semester": 4 },
+    { "id": "a5", "student_id": "s3", "date": "2026-08-01", "status": "Absent", "subject": "Signals & Systems", "semester": 4 },
+    { "id": "a6", "student_id": "s5", "date": "2026-08-01", "status": "Present", "subject": "Data Structures", "semester": 3 }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "fields": [
+    { "field": "id", "type": "string", "required": true },
+    { "field": "student_id", "type": "string", "required": true },
+    { "field": "subject", "type": "string", "required": true },
+    { "field": "semester", "type": "number", "required": true },
+    { "field": "internal_marks", "type": "number" },
+    { "field": "external_marks", "type": "number" },
+    { "field": "total_marks", "type": "number" },
+    { "field": "grade", "type": "enum", "enums": ["A+", "A", "B+", "B", "C", "D", "F"] },
+    { "field": "result", "type": "enum", "enums": ["Pass", "Fail"] }
+  ],
+  "data": [
+    { "id": "m1", "student_id": "s1", "subject": "Data Structures", "semester": 4, "internal_marks": 45, "external_marks": 38, "total_marks": 83, "grade": "A", "result": "Pass" },
+    { "id": "m2", "student_id": "s1", "subject": "Database Systems", "semester": 4, "internal_marks": 42, "external_marks": 40, "total_marks": 82, "grade": "A", "result": "Pass" },
+    { "id": "m3", "student_id": "s2", "subject": "Data Structures", "semester": 4, "internal_marks": 48, "external_marks": 42, "total_marks": 90, "grade": "A+", "result": "Pass" },
+    { "id": "m4", "student_id": "s2", "subject": "Database Systems", "semester": 4, "internal_marks": 44, "external_marks": 37, "total_marks": 81, "grade": "A", "result": "Pass" },
+    { "id": "m5", "student_id": "s3", "subject": "Signals & Systems", "semester": 4, "internal_marks": 35, "external_marks": 30, "total_marks": 65, "grade": "B", "result": "Pass" },
+    { "id": "m6", "student_id": "s5", "subject": "Data Structures", "semester": 3, "internal_marks": 40, "external_marks": 35, "total_marks": 75, "grade": "B+", "result": "Pass" }
+  ]
+}
